@@ -107,3 +107,15 @@ incompleteTitles := todo.Compress().Filter(func(task Task) bool {
 	    fmt.Println("-", task.Title)
     }
 ```
+
+
+## Exemple: Without struct
+```golang
+func main() {
+	numbers := []int{1,2,3,4,5,6,7,9.10}
+	compress := compress.New(numbers)
+	oddNumbers := compress.Filter(func(number int) bool {
+		return number % 2 == 0
+	}) 
+}
+```
