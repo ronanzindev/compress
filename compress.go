@@ -1,12 +1,12 @@
 package compress
 
 // ICompress is an interface that requires a type to return a pointer to Compress[T].
-type ICompress[T comparable] interface {
+type ICompress[T any] interface {
 	Compress() *Compress[T]
 }
 
 // Compress provides functional-style operations (map, filter, etc.) on a generic slice.
-type Compress[T comparable] struct {
+type Compress[T any] struct {
 	data []T
 }
 
