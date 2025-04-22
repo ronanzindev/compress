@@ -11,7 +11,7 @@ type Compress[T any] struct {
 }
 
 // New creates a new Compress instance from a slice of T.
-func New[T comparable](data []T) *Compress[T] {
+func New[T any](data []T) *Compress[T] {
 	if len(data) == 0 {
 		data = make([]T, 0)
 	}
