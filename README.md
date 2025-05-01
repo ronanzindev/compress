@@ -13,7 +13,7 @@
 - ✅ `Some`
 - ✅ `Every`
 - ✅ `Head`, `Tail`, `Pop`, `Shift`
-- ✅ `Entries`, `At`, `Slice`, `Result`
+- ✅ `Entries`, `At`, `Slice`, `Collect`
 
 ---
 
@@ -62,7 +62,7 @@ func main() {
 	completedTasks := todo.Compress().
 		Filter(func(task Task) bool {
 			return task.Completed
-		}).Result()
+		}).Collect()
 
 	fmt.Println("✅ Completed Tasks:")
 	for _, task := range completedTasks {
@@ -74,7 +74,7 @@ func main() {
 		Map(func(task Task) Task {
 			task.Completed = true
 			return task
-		}).Result()
+		}).Collect()
 
 	fmt.Println("\n📌 All Tasks Marked as Done:")
 	for _, task := range allDone {
@@ -100,7 +100,7 @@ incompleteTitles := todo.Compress().Filter(func(task Task) bool {
 	}).Map(func(task Task) Task {
 		fmt.Println("Processing:", task.Title)
 		return task
-	}).Result()
+	}).Collect()
 
     fmt.Println("\n📝 Incomplete Tasks:")
     for _, task := range incompleteTitles {
@@ -116,6 +116,6 @@ func main() {
 	compress := compress.New(numbers)
 	oddNumbers := compress.Filter(func(number int) bool {
 		return number % 2 == 0
-	}) 
+	}).Collect()
 }
 ```

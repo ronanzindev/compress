@@ -18,21 +18,15 @@ func New[T any](data []T) *Compress[T] {
 	return &Compress[T]{data}
 }
 
-// filterFunc defines a function that returns true if an element should be kept.
-type filterFunc[T any] = func(elem T) bool
-
-// mapFunc defines a function that transforms an element.
-type mapFunc[T any] = func(elem T) T
-
 // Filter keeps only the elements for which the provided function returns true.
 // If the receiver or its data is nil, it returns nil.
-func (c *Compress[T]) Filter(f filterFunc[T]) *Compress[T] {
+func (c *Compress[T]) Filter(predicate func(T) bool) *Compress[T] {
 	if len(c.data) == 0 {
 		return c
 	}
 	filteredData := make([]T, 0, len(c.data))
 	for _, elem := range c.data {
-		if f(elem) {
+		if predicate(elem) {
 			filteredData = append(filteredData, elem)
 		}
 	}
@@ -42,13 +36,26 @@ func (c *Compress[T]) Filter(f filterFunc[T]) *Compress[T] {
 
 // Map applies the provided function to each element in the slice, modifying it in place.
 // If the receiver or its data is nil, it returns nil.
-func (c *Compress[T]) Map(f mapFunc[T]) *Compress[T] {
+func (c *Compress[T]) Map(predicate func(T) T) *Compress[T] {
 	if len(c.data) == 0 {
 		return c
 	}
 	for i, elem := range c.data {
-		c.data[i] = f(elem)
+		c.data[i] = predicate(elem)
 	}
+	return c
+}
+
+func (c *Compress[T]) FlatMap(transfrom func(T) []T) *Compress[T] {
+	if len(c.data) == 0 {
+		return c
+	}
+	for _, item := range c.data {
+		for _, transfomed := range transfrom(item) {
+			c.data = append(c.data, transfomed)
+		}
+	}
+
 	return c
 }
 
@@ -132,16 +139,14 @@ func (c *Compress[T]) Range(start, end int) *Compress[T] {
 	return c
 }
 
-type everyFunc[T any] = func(elem T) bool
-
 // Every checks if all elements in the slice satisfy the given predicate function.
 // It returns false if the slice is nil or empty.
-func (c *Compress[T]) Every(f everyFunc[T]) bool {
+func (c *Compress[T]) Every(predicate func(T) bool) bool {
 	if len(c.data) == 0 {
 		return false
 	}
 	for _, elem := range c.data {
-		if !f(elem) {
+		if !predicate(elem) {
 			return false
 		}
 	}
@@ -162,24 +167,46 @@ func (c *Compress[T]) Entries() [][2]any {
 	return result
 }
 
-type findFunc[T any] = func(elem T) bool
-
 // Find returns the first element in the slice that satisfies the predicate function.
 // If no element matches or the slice is nil/empty, it returns the zero value of T.
-func (c *Compress[T]) Find(f findFunc[T]) T {
+func (c *Compress[T]) Find(predicate func(T) bool) T {
 	var value T
 	if len(c.data) == 0 {
 		return value
 	}
 	for _, e := range c.data {
-		if f(e) {
+		if predicate(e) {
 			return e
 		}
 	}
 	return value
 }
 
+func (c *Compress[T]) Reduce(inital T, reducer func(T, T) T) T {
+	result := inital
+	for _, item := range c.data {
+		result = reducer(result, item)
+	}
+	return result
+}
+
+func (c *Compress[T]) Limit(n int) *Compress[T] {
+	if len(c.data) == 0 {
+		return c
+	}
+	result := make([]T, len(c.data))
+	count := 0
+	for _, item := range c.data {
+		if count >= n {
+			break
+		}
+		result = append(result, item)
+		count++
+	}
+	return &Compress[T]{data: result}
+}
+
 // Returns the slice modified
-func (c *Compress[T]) Result() []T {
+func (c *Compress[T]) Collect() []T {
 	return c.data
 }
